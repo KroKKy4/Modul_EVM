@@ -1,0 +1,158 @@
+#include "head.c"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+struct BigNumber* MemoryOfNum(char* num)
+{
+	struct BigNumber* obj = malloc(sizeof(struct BigNumber));
+	if (!obj)
+		return NULL;
+	int size = strlen(num);
+	obj->arr = malloc(size * sizeof(short));
+	if (!obj->arr)
+	{
+		perror("ERROR");
+		free(obj);
+		return NULL;
+	}
+
+	obj->size = size;
+
+	for (int i = 0; i < obj->size; ++i)
+		obj->arr[i] = num[i] - 48;
+
+
+	return obj;
+}
+
+int PrintLongNumber(struct BigNumber* obj)
+{
+	for (int i = 0; i < obj->size; i++)
+	{
+		printf("%hi", obj->arr[i]);
+	}
+	printf("\n");
+	return 0;
+}
+
+int Summ(struct BigNumber* obj1, struct BigNumber* obj2)
+{
+	int SizeMax = 0;
+	if (obj1->size > obj2->size)
+		SizeMax = obj1->size;
+	else
+		SizeMax = obj2->size;
+
+	struct BigNumber* result = malloc(sizeof(struct BigNumber));
+	result->size = SizeMax + 1;
+	result->arr = malloc(result->size * sizeof(short));
+	for (int i = 0; i < result->size; ++i)
+	{
+		result->arr[i] = 0;
+	}
+
+
+	int tmp = 0;
+	int i = 0;
+	for (; i < min(obj1->size, obj2->size); i++)
+	{
+		result->arr[result->size - i - 1] += tmp;
+
+		tmp = 0;
+		if (result->arr[result->size - i - 1] + obj1->arr[obj1->size - i - 1] + obj2->arr[obj2->size - i - 1] < 10)
+			result->arr[result->size - i - 1] += obj1->arr[obj1->size - i - 1] + obj2->arr[obj2->size - i - 1];
+		else
+		{
+			tmp = 1;
+			result->arr[result->size - i - 1] = (result->arr[result->size - i - 1] + obj1->arr[obj1->size - i - 1] + obj2->arr[obj2->size - i - 1]) % 10;
+		}
+	}
+
+	if (tmp)
+		result->arr[result->size - i - 1] += tmp;
+	if (obj1->size != obj2->size)
+	{
+		for (int j = i; j < (max(obj1->size, obj2->size)); j++)
+		{
+			if (obj1->size > obj2->size)
+				result->arr[result->size - j - 1] += obj1->arr[obj1->size - j - 1];
+			else
+				result->arr[result->size - j - 1] += obj2->arr[obj2->size - j - 1];
+
+		}
+	}
+
+	struct BigNumber* buff = NULL;
+	if (result->arr[0] == 0)
+	{
+		buff = malloc(sizeof(struct BigNumber));
+		buff->size = SizeMax;
+		buff->arr = malloc(buff->size * sizeof(short));
+		int i = 1;
+		int j = 0;
+		for (; i < result->size; i++, j++)
+		{
+			buff->arr[j] = result->arr[i];
+		}
+		free(result);
+		return buff;
+	}
+	return result;
+}
+
+int Diff(struct BigNumber* obj1, struct BigNumber* obj2)
+{
+	int SizeMax = 0;
+	if (obj1->size > obj2->size)
+		SizeMax = obj1->size;
+	else
+		SizeMax = obj2->size;
+
+	struct BigNumber* res = malloc(sizeof(struct BigNumber));
+	res->size = SizeMax;
+	res->arr = malloc(res->size * sizeof(short));
+	for (int i = 0; i < res->size; ++i)
+	{
+		res->arr[i] = 0;
+	}
+
+
+	int tmp = 0;
+
+	for (int i = 0; i < min(obj1->size, obj2->size); i++)
+	{
+		res->arr[res->size - i - 1] -= tmp;
+
+		tmp = 0;
+
+		if (res->arr[res->size - i - 1] + obj1->arr[obj1->size - i - 1] - obj2->arr[obj2->size - i - 1] > 0)
+			res->arr[res->size - i - 1] += obj1->arr[obj1->size - i - 1] - obj2->arr[obj2->size - i - 1];
+		else
+		{
+			tmp = 1;
+			res->arr[res->size - i - 1] = (res->arr[res->size - i - 1] + 10 + obj1->arr[obj1->size - i - 1] - obj2->arr[obj2->size - i - 1]);
+		}
+	}
+	if (tmp)
+		res->arr[0] += tmp;
+
+	if (obj1->size != obj2->size)
+	{
+		for (size_t i = 0; i < (abs(obj1->size - obj2->size)); i++)
+		{
+			if (obj1->size > obj2->size)
+				res->arr[i] = obj1->arr[i];
+			else
+				res->arr[i] = obj2->arr[i];
+
+		}
+	}
+
+	if (obj2->size > obj1->size)
+	{
+		res->arr[0] *= -1;
+	}
+
+	return res;
+}
